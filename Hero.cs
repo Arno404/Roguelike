@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Roguelike
 {
+//lol
     class Hero
     {
         public Point Coords { get; set; }
