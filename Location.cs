@@ -29,8 +29,12 @@ namespace Roguelike
             Console.SetCursorPosition(hero.Coords.X, hero.Coords.Y);
             Console.Write("@");
             Console.SetCursorPosition(HeroPrevCoords.X, HeroPrevCoords.Y);
-            Console.Write(".");
+            Console.Write(GetSymbolByCoords(HeroPrevCoords));
             HeroPrevCoords = new Point(hero.Coords.X, hero.Coords.Y);
+        }
+        public char GetSymbolByCoords(Point point)
+        {
+            return AsciiView[point.Y][point.X];
         }
     }
 }
