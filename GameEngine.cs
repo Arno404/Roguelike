@@ -134,7 +134,6 @@ namespace Roguelike
             Inspector.IsInspect = true;
             Inspector.Coords.SetValue(CurrentHero.Coords);
             TileFactory factory = new TileFactory();
-            //char symbol = CurrentHero.Symbol;
             TileFlyweight tile;
             while (Inspector.IsInspect)
             {
