@@ -8,6 +8,8 @@ namespace Roguelike
         protected List<MenuItem> MenuItems;
         protected int CurIndex = 0;
         protected ConsoleColor FgColor = ConsoleColor.Green;
+        private int ConsoleHeight = 0;
+        private int ConsoleWidth = 0;
 
         protected virtual void Print(int offsetX, int offsetY)
         {
@@ -39,13 +41,24 @@ namespace Roguelike
             return false;
         }
 
+        private void HandleConsoleResize()
+        {
+            if (ConsoleWidth != Console.WindowWidth || ConsoleHeight != Console.WindowHeight)
+                Console.CursorVisible = false;
+            ConsoleHeight = Console.WindowHeight;
+            ConsoleWidth = Console.WindowWidth;
+        }
+
         public void Process(int offsetX = 0, int offsetY = 0)
         {
+            ConsoleHeight = Console.WindowHeight;
+            ConsoleWidth = Console.WindowWidth;
             while (true)
             {
                 Print(offsetX, offsetY);
                 var key = Console.ReadKey().Key;
                 int prevIndex = CurIndex;
+                HandleConsoleResize();
 
                 if (ProcessKey(key) == true)
                     MenuItems[CurIndex].OnClick();
