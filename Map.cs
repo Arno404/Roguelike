@@ -51,13 +51,13 @@ namespace CaveGenerator
         /// Caves within the map are stored here
         /// </summary>
         ///
-        [DataMember]
+        [JsonIgnore]
         private List<List<Point>> Caves;
 
         /// <summary>
         /// Corridors within the map stored here
         /// </summary>
-        [DataMember]
+        [JsonIgnore]
         private List<Point> Corridors;
 
         /// <summary>

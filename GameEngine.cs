@@ -61,9 +61,10 @@ namespace Roguelike
             info.AddValue("ConsoleW", this.ConsoleWidth);
             info.AddValue("TmpMonster", this.TmpMonster);
         }
-        public void InitFromSave()
+        public void InitFromSave(Int16 numberofsave)
         {
-            FileStream buffer = File.OpenRead("C:\\save1.txt");
+            string path = MakeCorrectPath();
+            FileStream buffer = File.OpenRead(path+$"{numberofsave}.txt");
             DataContractJsonSerializer jsonSerializer = new DataContractJsonSerializer(typeof(GameEngine));
             GameEngine tmpengine = jsonSerializer.ReadObject(buffer) as GameEngine;
             CurrentHero = tmpengine.CurrentHero;
@@ -75,10 +76,29 @@ namespace Roguelike
             ConsoleHeight = tmpengine.ConsoleHeight;
             ConsoleWidth = tmpengine.ConsoleHeight;
         }
-        public void Save()
+        public string MakeCorrectPath()
+        {
+            string path = "";
+            if (Environment.OSVersion.ToString()[0] == 'M')
+            {
+                path = @"..\Saves\Save";
+            }
+            if (Environment.OSVersion.ToString()[0] == 'U')
+            {
+                path = @"../Saves/Save";
+            }
+            return path;
+        }
+        public void Save(Int16 numberofsavefile)
         {
             DataContractJsonSerializer jsonSerializer = new DataContractJsonSerializer(typeof(GameEngine));
-            FileStream buffer = File.Create("C:\\Save1.txt");
+            string path = MakeCorrectPath();
+            DirectoryInfo dirInfo = new DirectoryInfo(path.Substring(0,8));
+            if (!dirInfo.Exists)
+            {
+                dirInfo.Create();
+            }
+            FileStream buffer = File.Create(path+$"{numberofsavefile}.txt");
             jsonSerializer.WriteObject(buffer,this);
             buffer.Close();
         }
