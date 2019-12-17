@@ -1,15 +1,23 @@
 ﻿using System;
+using Newtonsoft.Json;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 namespace Roguelike
-{
+{   [DataContract]
+    [KnownType(typeof(TileFlyweight.Type))]
+    [KnownType(typeof(BaseEntity))]
     class Tile
-    {
-        public Point Coords { get; set; }
+    {   [DataMember]
         public TileFlyweight.Type Type { get; set; }
+        [DataMember]
+        public BaseEntity Object { get; set; }
+        [DataMember]
+        public bool Visible { get; set; }
 
-        public Tile(Point coords, TileFlyweight.Type type)
+        public Tile(TileFlyweight.Type type, BaseEntity obj = null)
         {
-            Coords = coords;
             Type = type;
+            Object = obj;
         }
     }
 }

@@ -37,11 +37,13 @@ namespace Roguelike
         {
             Int16 number;
             Console.Write("Select savefile:");
-            while (!Int16.TryParse(Console.ReadLine(), out number) || number < 1 || number > 5)
+            string input = Console.ReadLine();
+            while (input!="c" & (!Int16.TryParse(input, out number) || number < 1 || number > 5))
             {
                 Console.WriteLine("Wrong input or savefile number > 6");
+                input = Console.ReadLine();
             }
-            if (Program.GameEngine.GameStarted == true)
+            if (input!="c" && Program.GameEngine.GameStarted == true)
             {
                 Program.GameEngine.Save(number);
                 Program.GameEngine.PlayGame();
@@ -59,11 +61,13 @@ namespace Roguelike
             string path = Program.GameEngine.MakeCorrectPath();
             Int16 number;
             Console.Write("Select loadfile:");
-            while (!Int16.TryParse(Console.ReadLine(), out number) || number < 1 || number > 5)
-            {
+            string input = Console.ReadLine();
+            while (input != "c" & (!Int16.TryParse(input, out number) || number < 1 || number > 5))
+            { 
                 Console.WriteLine("Wrong input");
+                input = Console.ReadLine();
             }
-            if (System.IO.File.Exists(path+$"{number}.txt"))
+            if (input != "c" && System.IO.File.Exists(path+$"{number}.txt"))
             {
                 Program.GameEngine.InitFromSave(number);
                 Program.GameEngine.PlayGame();

@@ -10,86 +10,71 @@ using System.Runtime.Serialization.Json;
 namespace Roguelike
 {
     [DataContract]
+    [KnownType(typeof(BaseEntity))]
     abstract class Character : BaseCharacter
     {
-        public enum Speed
-        {
-            Normal,
-            High
-        }
-        [DataMember]
-        public Speed CurrentSpeed { get; set; }
         [DataMember]
         public int HitPoints { get; set; }
         [DataMember]
+        public int MovePoints { get; set; }
+        [DataMember]
+        public int SpeedPoints { get; set; }
+        [DataMember]
         public int RangeOfVision { get; set; }
         [DataMember]
-        public bool IsMoved { get; set; }
-        protected abstract bool HandleCollisions(char mapSymbol, char entitySymbol);
-        //sets CurrentGameAction, returns true if we can move, otherwise - false
-        public override void Move() //sets IsMoved
+        public bool IsActionDone { get; set; }
+        [DataMember]
+        public BaseEntity Target { get; set; }
+        protected abstract void ResetGameAction();
+        protected abstract bool HandleCollisions(TileFlyweight tile);
+        //sets IsActionDone, sets CurrentGameAction, returns true if we can move
+        public override void Move()
         {
-            Point tmp = new Point();
+            TileFlyweight tile;
+            bool isMoved;
+
+            SetPrevCoords();
+            Target = null;
+
             switch (CurrentMoveAction)
             {
                 case MoveAction.Up:
-                    tmp.SetValue(Coords.X, Coords.Y - 1);
-                    IsMoved = HandleCollisions(Program.GameEngine.GetMapSymbol(tmp),
-                                               Program.GameEngine.GetEntitySymbol(tmp));
-                    if (IsMoved) SetPrevPlusMove(MoveAction.Up);
+                    tile = Program.GameEngine.GetTile(Coords.X, Coords.Y - 1);
                     break;
                 case MoveAction.Down:
-                    tmp.SetValue(Coords.X, Coords.Y + 1);
-                    IsMoved = HandleCollisions(Program.GameEngine.GetMapSymbol(tmp),
-                                               Program.GameEngine.GetEntitySymbol(tmp));
-                    if (IsMoved) SetPrevPlusMove(MoveAction.Down);
+                    tile = Program.GameEngine.GetTile(Coords.X, Coords.Y + 1);
                     break;
                 case MoveAction.Left:
-                    tmp.SetValue(Coords.X - 1, Coords.Y);
-                    IsMoved = HandleCollisions(Program.GameEngine.GetMapSymbol(tmp),
-                                               Program.GameEngine.GetEntitySymbol(tmp));
-                    if (IsMoved) SetPrevPlusMove(MoveAction.Left);
+                    tile = Program.GameEngine.GetTile(Coords.X - 1, Coords.Y);;
                     break;
                 case MoveAction.Right:
-                    tmp.SetValue(Coords.X + 1, Coords.Y);
-                    IsMoved = HandleCollisions(Program.GameEngine.GetMapSymbol(tmp),
-                                               Program.GameEngine.GetEntitySymbol(tmp));
-                    if (IsMoved) SetPrevPlusMove(MoveAction.Right);
+                    tile = Program.GameEngine.GetTile(Coords.X + 1, Coords.Y);
                     break;
                 default:
-                    IsMoved = false;
-                    break;
+                    IsActionDone = false;
+                    return;
             }
-            if(CurrentSpeed == Speed.High && IsMoved)
+
+            if(tile.Price == -1)
             {
-                switch (CurrentMoveAction)
-                {
-                    case MoveAction.Up:
-                        tmp.SetValue(Coords.X, Coords.Y - 1);
-                        if (HandleCollisions(Program.GameEngine.GetMapSymbol(tmp),
-                                             Program.GameEngine.GetEntitySymbol(tmp)))
-                            MoveUp();
-                        break;
-                    case MoveAction.Down:
-                        tmp.SetValue(Coords.X, Coords.Y + 1);
-                        if (HandleCollisions(Program.GameEngine.GetMapSymbol(tmp),
-                                             Program.GameEngine.GetEntitySymbol(tmp)))
-                            MoveDown();
-                        break;
-                    case MoveAction.Left:
-                        tmp.SetValue(Coords.X - 1, Coords.Y);
-                        if (HandleCollisions(Program.GameEngine.GetMapSymbol(tmp),
-                                             Program.GameEngine.GetEntitySymbol(tmp)))
-                            MoveLeft();
-                        break;
-                    case MoveAction.Right:
-                        tmp.SetValue(Coords.X + 1, Coords.Y);
-                        if (HandleCollisions(Program.GameEngine.GetMapSymbol(tmp),
-                                             Program.GameEngine.GetEntitySymbol(tmp)))
-                            MoveRight();
-                        break;
-                }
+                ResetGameAction();
+                IsActionDone = true;
+
+                if (this.Symbol == '@') //simple check, <=> (this is Hero)
+                    Program.GameEngine.InfoBorder.WriteNextLine($"{Name} can't go there"); //this code is not nessesary
+                return;
             }
+            MovePoints += SpeedPoints;
+            if(MovePoints < tile.Price)
+            {
+                ResetGameAction();
+                IsActionDone = true;
+                return;
+            }
+            MovePoints -= tile.Price;
+
+            isMoved = HandleCollisions(tile);
+            if (isMoved) MoveEntity();
         }
     }
 }

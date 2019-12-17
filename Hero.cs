@@ -7,19 +7,22 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 namespace Roguelike
 {   [DataContract]
+    [KnownType(typeof(GameAction))]
     class Hero : Character
     {
-        public Hero(Point coords, int hitPoints, int expPoints, int rangeOfVision, Character.Speed speed, string name)
+        public Hero(Point coords, int hitPoints, int expPoints, int rangeOfVision, int speedPoints, string name)
         {
             Coords = coords;
             PrevCoords = new Point(coords.X, coords.Y);
             HitPoints = hitPoints; //should depend on class/hit dices
             ExpPoints = expPoints;
             RangeOfVision = rangeOfVision;
-            CurrentSpeed = speed;
+            SpeedPoints = speedPoints;
+            MovePoints = 0;
             Name = name;
             Symbol = '@';
-            IsMoved = false;
+            IsActionDone = false;
+            Program.GameEngine.SetObject(coords.X, coords.Y, this);
         }
         public Hero() { }
         public enum GameAction
@@ -30,7 +33,7 @@ namespace Roguelike
             InspectMap = ConsoleKey.M,
             Attack,
             DropItem
-        }        [DataMember]        public int ExpPoints { get; set; }        public GameAction CurrentGameAction { get; set; }        public void DoGameAction()
+        }        [DataMember]        public int ExpPoints { get; set; }        [DataMember]        public GameAction CurrentGameAction { get; set; }        public void DoGameAction()
         {
             switch (CurrentGameAction)
             {
@@ -38,53 +41,55 @@ namespace Roguelike
                     //OpenInventory(Hero.Inventory)
                     //Hero.Inventory is a list, containing many lists of
                     //weapon, armor, potion and so on..
-                    Console.SetCursorPosition(Program.GameEngine.InfoBorder.Offset.X, Program.GameEngine.InfoBorder.Offset.Y);
-                    Console.WriteLine("You open an inventory");
+                    Program.GameEngine.InfoBorder.WriteNextLine("You open an inventory");
+                    IsActionDone = false;
                     break;
                 case GameAction.PickUpItem:
                     //Hero.AddItem(Item)
-                    Console.SetCursorPosition(Program.GameEngine.InfoBorder.Offset.X, Program.GameEngine.InfoBorder.Offset.Y);
-                    Console.WriteLine("You pick up an item");
+                    Program.GameEngine.InfoBorder.WriteNextLine("You pick up an item");
+                    IsActionDone = true;
                     break;
                 case GameAction.Exit:
                     Program.GameEngine.StartMenu();
+                    IsActionDone = false;
                     break;
                 case GameAction.Attack:
-                    //attack
+                    //make this as attack function
+                    IsActionDone = true;
                     break;
                 case GameAction.DropItem:
                     //drop item
-                    Console.SetCursorPosition(Program.GameEngine.InfoBorder.Offset.X, Program.GameEngine.InfoBorder.Offset.Y);
-                    Console.WriteLine("You drop an item");
+                    Program.GameEngine.InfoBorder.WriteNextLine("You drop an item");
+                    IsActionDone = false;
                     break;
                 case GameAction.InspectMap:
-                    Console.SetCursorPosition(Program.GameEngine.InfoBorder.Offset.X, Program.GameEngine.InfoBorder.Offset.Y);
-                    Console.WriteLine("You explore the map");
+                    Program.GameEngine.InfoBorder.Clear();
+                    Program.GameEngine.InfoBorder.WriteNextLine("You are inspecting the map");
                     Program.GameEngine.InspectMap();
+                    IsActionDone = false;
                     break;
                 default:
-                    //Console.SetCursorPosition(Program.GameEngine.InfoBorder.Offset.X, Program.GameEngine.InfoBorder.Offset.Y);
-                    //Console.WriteLine("You do nothing");
+                    IsActionDone = false;
                     break;
             }
-        }        protected override bool HandleCollisions(char mapSymbol, char entitySymbol)
+        }        protected override void ResetGameAction()
         {
-            switch (mapSymbol)
+            CurrentGameAction = (GameAction)(1000);
+        }        protected override bool HandleCollisions(TileFlyweight tile)
+        {
+            ResetGameAction();
+            IsActionDone = true;
+
+            if (tile.Object == null) return true;
+            Target = tile.Object;
+            
+            if(Target is Monster)
             {
-                case '▒':
-                    //make this as log function that depends on symbol we switching
-                    Console.SetCursorPosition(Program.GameEngine.InfoBorder.Offset.X, Program.GameEngine.InfoBorder.Offset.Y);
-                    Console.WriteLine("You hit a wall!");
-                    return false;
-                case 'S': //snake
-                    //CurrentGameAction = attack
-                    return false;
-                case '$': //money
-                    //CurrentGameAction = pick up item
-                    return true;
-                default:
-                    Console.SetCursorPosition(Program.GameEngine.InfoBorder.Offset.X, Program.GameEngine.InfoBorder.Offset.Y);
-                    Console.WriteLine(new string(' ', 20));
-                    return true;
+                CurrentGameAction = GameAction.Attack;
+                Program.GameEngine.InfoBorder.WriteNextLine($"{Name} ran into {Target.Name}");
+                return false;
             }
+
+            return true;
+            //if (Target is Treasure)...
         }    }}

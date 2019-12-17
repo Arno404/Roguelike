@@ -11,16 +11,18 @@ namespace Roguelike
 {   [DataContract]
     class Monster : Character
     {
-        public Monster(Point coords, int hitPoints, int rangeOfVision, Character.Speed speed, string name, char symbol)
+        public Monster(Point coords, int hitPoints, int rangeOfVision, int speedPoints, string name, char symbol)
         {
             Coords = coords;
             PrevCoords = new Point(coords.X, coords.Y);
             HitPoints = hitPoints; //should depend on class/hit dices
             RangeOfVision = rangeOfVision;
-            CurrentSpeed = speed;
+            SpeedPoints = speedPoints;
+            MovePoints = 0;
             Name = name;
             Symbol = symbol;
-            IsMoved = false;
+            IsActionDone = false;
+            Program.GameEngine.SetObject(coords.X, coords.Y, this);
             ChanceToGoUp = 0.25;
             ChanceToGoDown = 0.25;
             ChanceToGoRight = 0.25;
@@ -49,6 +51,8 @@ namespace Roguelike
         }
         [DataMember]
         public GameAction CurrentGameAction { get; set; }
+
+        #region AI
         private void DecreaseChances()
         {
             ChanceToGoUp -= StandardDecreasingChance;
@@ -130,8 +134,8 @@ namespace Roguelike
                 return;
             }
             CurrentMoveAction = BaseCharacter.MoveAction.Left;
-            Console.WriteLine(CurrentMoveAction);
         }
+        #endregion
 
         public void MoveTo(BaseCharacter enemy)
         {
@@ -139,25 +143,46 @@ namespace Roguelike
 
             if (Coords.GetDistance(enemy.Coords) > RangeOfVision)
             {
-                IsMoved = false;
+                IsActionDone = false;
                 return;
             }
             SetMoveAction();
             Move();
             distance = Coords.GetDistance(enemy.Coords);
             SetChances(distance, CurrentMoveAction);
-            if (IsMoved) PrevDistance = distance;
+            if (IsActionDone) PrevDistance = distance;
         }
-        protected override bool HandleCollisions(char mapSymbol, char entitySymbol)
+        public void DoGameAction()
         {
-            switch (mapSymbol)
+            switch (CurrentGameAction)
             {
-                case '▒':
-                    SetStandardChances();
-                    return false;
+                case GameAction.Attack:
+                    //make this as attack function
+                    IsActionDone = true;
+                    break;
                 default:
-                    return true;
+                    IsActionDone = false;
+                    break;
             }
+        }
+        protected override void ResetGameAction()
+        {
+            CurrentGameAction = (GameAction)(1000);
+        }
+        protected override bool HandleCollisions(TileFlyweight tile)
+        {
+            ResetGameAction();
+            if (tile.Object == null) return true;
+            Target = tile.Object;
+
+            if (Target is Hero)
+            {
+                CurrentGameAction = GameAction.Attack;
+                Program.GameEngine.InfoBorder.WriteNextLine($"{Name} ran into {Target.Name}");
+                return false;
+            }
+
+            return true;
         }
     }
 }
