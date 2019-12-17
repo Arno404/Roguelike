@@ -8,12 +8,12 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 
 namespace Roguelike
-{   [Serializable]
+{   [DataContract]
     [KnownType(typeof(Hero))]
     [KnownType(typeof(Cave))]
     [KnownType(typeof(Monster))]
     [KnownType(typeof(Rectangle))]
-    class GameEngine : ISerializable
+    class GameEngine
     {   [DataMember]
         private Hero CurrentHero;
         [NonSerialized]
@@ -38,29 +38,7 @@ namespace Roguelike
         private Monster TmpMonster; //make this as list
         [DataMember]
         public Random GameRandom = new Random();
-        public GameEngine(){}
-        public GameEngine(SerializationInfo info, StreamingContext context)
-        {
-            this.CurrentHero = (Hero)info.GetValue("CurrentHero", typeof(Hero));
-            this.HeroInfoBorder = (Rectangle)info.GetValue("HeroInfoBorder", typeof(Rectangle));
-            this.Map = (Cave)info.GetValue("Map", typeof(Cave));
-            this.MapBorder = (Rectangle)info.GetValue("MapBorder", typeof(Rectangle));
-            this.InfoBorder = (Rectangle)info.GetValue("InfoBorder", typeof(Rectangle));
-            this.ConsoleHeight = (int)info.GetValue("ConsoleH", typeof(int));
-            this.ConsoleWidth = (int)info.GetValue("ConsoleW", typeof(int));
-            this.TmpMonster = (Monster)info.GetValue("TmpMonster", typeof(Monster));
-        }
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("CurrentHero", this.CurrentHero);
-            info.AddValue("Map", this.Map);
-            info.AddValue("HeroInfoBorder", this.HeroInfoBorder);
-            info.AddValue("MapBorder", this.MapBorder);
-            info.AddValue("InfoBorder", this.InfoBorder);
-            info.AddValue("ConsoleH", this.ConsoleHeight);
-            info.AddValue("ConsoleW", this.ConsoleWidth);
-            info.AddValue("TmpMonster", this.TmpMonster);
-        }
+        public GameEngine() { }
         public void InitFromSave(Int16 numberofsave)
         {
             string path = MakeCorrectPath();
