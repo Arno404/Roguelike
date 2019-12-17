@@ -25,7 +25,7 @@ namespace Roguelike
             Map = new Cave();
             Map.Build();
             Map.ConnectCaves();
-            Map.WriteMapIntoFile();
+            Map.BuildTileMap();
             Map.Offset = new Point(0, 0);
             CurrentHero = new Hero(new Point(12, 10), 15, 0, 8, 10, "Chiks-Chiriks");
             TmpMonster = new Monster(new Point(15, 15), 10, 10, 10, "Snake", 'S');
@@ -75,16 +75,26 @@ namespace Roguelike
             Inspector.Coords.SetValue(CurrentHero.Coords);
             char symbol = CurrentHero.Symbol;
             TileFlyweight tile;
+            ConsoleColor color;
+            string description;
             while (Inspector.IsInspect)
             {
                 tile = GetTile(Inspector.Coords.X, Inspector.Coords.Y);
                 if (tile.Object != null) //TODO: draw this with right color
+                {
+                    description = tile.Object.Name; // must be description
                     symbol = tile.Object.Symbol;
-                else symbol = tile.Symbol;
+                }
+                else
+                {
+                    description = tile.Description;
+                    symbol = tile.Symbol;
+                }
+                color = tile.Color;
 
-                InfoBorder.ClearLineAndWrite($"{tile.Description}: {tile.Symbol}", 1);
+                InfoBorder.ClearLineAndWrite($"{description}: {symbol}", color, tile.Description.Length + 2, 1);
 
-                RedrawInspector(symbol);
+                RedrawInspector(symbol, color);
                 Input(Inspector);
                 HandleConsoleResize();
                 if (!Inspector.IsInspect)
@@ -115,15 +125,14 @@ namespace Roguelike
             int distToLeft = baseCharacter.Coords.X - Map.Offset.X + 1;
             int distToRight = MapBorder.Width - baseCharacter.Coords.X + Map.Offset.X - 2;
             int distToBot = MapBorder.Height - 2 - baseCharacter.Coords.Y + Map.Offset.Y;
-            int critDistHor = MapBorder.Width / 8;
-            int critDistVert = MapBorder.Height / 8;
-            if (distToTop <= critDistVert)
+            int vision = CurrentHero.RangeOfVision;
+            if (distToTop <= vision)
                 MoveMapToDir(MapMoveDirection.Bot);
-            else if (distToBot <= critDistVert)
+            else if (distToBot <= vision)
                 MoveMapToDir(MapMoveDirection.Top);
-            else if (distToRight <= critDistHor)
+            else if (distToRight <= vision)
                 MoveMapToDir(MapMoveDirection.Left);
-            else if (distToLeft <= critDistHor)
+            else if (distToLeft <= vision)
                 MoveMapToDir(MapMoveDirection.Right);
         }
 
@@ -164,7 +173,7 @@ namespace Roguelike
 
         #region drawstuff
 
-        private void RedrawInspector(char symbol)
+        private void RedrawInspector(char symbol, ConsoleColor color)
         {
             int left = Inspector.Coords.X;
             int top = Inspector.Coords.Y;
@@ -185,9 +194,9 @@ namespace Roguelike
                 if (!Inspector.IsInspect) break;
 
                 Console.SetCursorPosition(left - Map.Offset.X + MapBorder.Offset.X, top - Map.Offset.Y + MapBorder.Offset.Y);
-                //Console.BackgroundColor = ConsoleColor.DarkRed;
+                Console.ForegroundColor = color;
                 Console.Write(symbol);
-                //Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.White;
                 Thread.Sleep(100);
             }
             Console.ResetColor();
@@ -212,6 +221,7 @@ namespace Roguelike
         private void RedrawCharacter(Character character)
         {
             //must not redraw when character coords is out of current console size 
+            DrawCharacter(character);
             int left = character.PrevCoords.X - Map.Offset.X + MapBorder.Offset.X;
             int top = character.PrevCoords.Y - Map.Offset.Y + MapBorder.Offset.Y;
             if (left >= MapBorder.Offset.X && left <= MapBorder.Offset.X + MapBorder.Width - 3 &&
@@ -234,6 +244,7 @@ namespace Roguelike
         private void Draw()
         {
             FOV();
+            TileFlyweight tileFlyweight;
             for (int i = Map.Offset.Y, y = 0; y < MapBorder.Height - 2 && i < Map.WorldTile.GetLength(0); i++, y++)
             {
                 for (int j = Map.Offset.X, x = 0; x < MapBorder.Width - 2 && j < Map.WorldTile.GetLength(1); j++, x++)
@@ -241,7 +252,10 @@ namespace Roguelike
                     if (Map.WorldTile[i, j].Visible)
                     {
                         Console.SetCursorPosition(MapBorder.Offset.X + x, MapBorder.Offset.Y + y);
-                        Console.Write(GetTile(j, i).Symbol);
+                        tileFlyweight = GetTile(j, i);
+                        Console.ForegroundColor = tileFlyweight.Color;
+                        Console.Write(tileFlyweight.Symbol);
+                        Console.ResetColor();
                     }
                 }
             }
@@ -367,12 +381,6 @@ namespace Roguelike
         public int GetMapWidth()
         {
             return Map.MapSize.Width;
-        }
-
-        public char GetMapSymbol(Point point)
-        {
-            char symbol = Map.WorldAscii[point.Y][point.X];
-            return symbol;
         }
 
         /// <summary>

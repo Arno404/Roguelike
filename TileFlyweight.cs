@@ -8,6 +8,7 @@ namespace Roguelike
         public char Symbol { get; }
         public int Price {get; set;}
         public Type TileType { get; }
+        public ConsoleColor Color { get; }
         public BaseEntity Object { get; set; }
 
         public enum Type
@@ -18,13 +19,14 @@ namespace Roguelike
             Lava = 3
         }
 
-        public TileFlyweight(string name, string description, char symbol, int price, Type type, BaseEntity obj = null)
+        public TileFlyweight(string name, string description, char symbol, int price, Type type, ConsoleColor color = ConsoleColor.White, BaseEntity obj = null)
         {
             Name = name;    
             Description = description;
             Symbol = symbol;
             Price = price;
             TileType = type;
+            Color = color;
             Object = obj;
         }
     }
