@@ -15,6 +15,11 @@ namespace Roguelike
             X = x;
             Y = y;
         }
+        public Point(Point x)
+        {
+            X = x.X;
+            Y = x.Y;
+        }
         public Point() { }
 
         public bool IsPointEqual(Point x)
