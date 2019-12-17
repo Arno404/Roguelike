@@ -46,8 +46,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Character.cs" />
+    <Compile Include="DumbAI.cs" />
     <Compile Include="GameEngine.cs" />
     <Compile Include="Hero.cs" />
+    <Compile Include="IMonsterIntelligence.cs" />
+    <Compile Include="DijkstraAI.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Monster.cs" />
     <Compile Include="Shapes.cs" />
