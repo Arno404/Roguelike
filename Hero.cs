@@ -10,7 +10,7 @@ namespace Roguelike
         public Hero(Point coords, int hitPoints, int expPoints, int rangeOfVision, int speedPoints, string name)
         {
             Coords = coords;
-            PrevCoords = new Point(coords.X, coords.Y);
+            PrevCoords = new Point(coords);
             HitPoints = hitPoints; //should depend on class/hit dices
             ExpPoints = expPoints;
             RangeOfVision = rangeOfVision;

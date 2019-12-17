@@ -11,7 +11,7 @@ namespace Roguelike
         public Monster(Point coords, int hitPoints, int rangeOfVision, int speedPoints, string name, char symbol, IMonsterIntelligence ai)
         {
             Coords = coords;
-            PrevCoords = new Point(coords.X, coords.Y);
+            PrevCoords = new Point(coords);
             HitPoints = hitPoints; //should depend on class/hit dices
             RangeOfVision = rangeOfVision;
             SpeedPoints = speedPoints;

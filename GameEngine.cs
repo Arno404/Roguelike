@@ -29,7 +29,7 @@ namespace Roguelike
             Map.Offset = new Point(0, 0);
             CurrentHero = new Hero(new Point(12, 10), 15, 0, 8, 10, "Chiks-Chiriks");
             TmpMonster = new Monster(new Point(15, 15), 10, 1000, 10, "Snake", 'S', new DijkstraAI());
-            Inspector = new MapInspector("Inspector", new Point(CurrentHero.Coords.X, CurrentHero.Coords.Y));
+            Inspector = new MapInspector("Inspector", new Point(CurrentHero.Coords));
             GameStarted = true;
             ConsoleHeight = Console.WindowHeight;
             ConsoleWidth = Console.WindowWidth;
