@@ -11,6 +11,7 @@ namespace Roguelike
         public static GameEngine GameEngine = new GameEngine();
         public static void CleanUpAndExit()
         {
+            Console.ResetColor();
             Console.Clear();
             Console.CursorVisible = true;
             Environment.Exit(0);

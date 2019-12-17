@@ -13,7 +13,6 @@ namespace CaveGenerator
 
         private Random rnd;
 
-        public string[] WorldAscii { get; private set; }
         public Roguelike.Tile[,] WorldTile { get; private set; }
         public Roguelike.Point Offset { get; set; }
         #region properties
@@ -114,40 +113,28 @@ namespace CaveGenerator
             BreakOut = 100000;
         }
 
-        public void WriteMapIntoFile()
+        public void BuildTileMap()
         {
             int worldHeight = Map.GetLength(0);
             int worldWidth = Map.GetLength(1);
             WorldTile = new Roguelike.Tile[worldHeight, worldWidth];
+            int k = 2;
             for (int x = 0; x < MapSize.Width; x++)
                 for (int y = 0; y < MapSize.Height; y++)
                 {
                     if (x == 0 || x == MapSize.Width - 1 || y == 0 || y == MapSize.Height - 1)
                         Map[x, y] = 0;
+                    else if (rnd.Next(0, 200) == 0 &&
+                     x > MapSize.Width / 5 && x < MapSize.Width * 4 / 5 &&
+                        y > MapSize.Height / 5 && y < MapSize.Height * 4 / 5 && Map[x + 1, y + 1] == 1 && Map[x - 1, y - 1] == 1)
+                    {
+                        k = rnd.Next(2, 4);
+                        for (int i = rnd.Next(x - 2, x + 3); i < x + rnd.Next(5, 12); i++)
+                            for (int j = rnd.Next(y - 2, y + 3); j < y + rnd.Next(5, 12); j++)
+                                Map[i, j] = k;
+                    }
                     WorldTile[x, y] = new Roguelike.Tile((Roguelike.TileFlyweight.Type)Map[x, y]);
                 }
-            WorldAscii = new string[worldHeight];
-            StringBuilder[] builder = new StringBuilder[worldHeight];
-            for (var x = 0; x < worldHeight; x++)
-            {
-                builder[x] = new StringBuilder();
-                for (var y = 0; y < worldWidth; y++)
-                {
-                    //true == wall, false == ".", 2 == treasure; 0 == wall, 1 == ".".
-                    if (Map[x, y] == 0)
-                        builder[x].Append("▒");
-                    //Console.Write("#");
-                    //The colour of treasure!
-                    else
-                        builder[x].Append(".");
-                    //Console.Write(".");
-                }
-                //Console.WriteLine();
-            }
-            for (int i = 0; i < worldHeight; i++)
-            {
-                WorldAscii[i] = builder[i].ToString();
-            }
         }
 
         public int Build()
@@ -177,7 +164,7 @@ namespace CaveGenerator
             //the +5 offsets are to leave an empty border round the edge of the map
             for (int x = 0; x < MapSize.Width; x++)
                 for (int y = 0; y < MapSize.Height; y++)
-                    if (rnd.Next(0, 100) < CloseCellProb)
+                    if (rnd.Next(0, 100) < CloseCellProb && Map[x, y] != 2)
                         Map[x, y] = 1;
 
             Point cell;

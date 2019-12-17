@@ -73,10 +73,26 @@ namespace Roguelike
             Console.Write(line);
         }
 
+        public void WriteLine(string line, ConsoleColor color, int numOfSymb, int number = 0)
+        {
+            Console.SetCursorPosition(Offset.X, Offset.Y + number);
+            Console.Write(line.Substring(0, numOfSymb));
+            Console.ForegroundColor = color;
+            Console.SetCursorPosition(Offset.X + numOfSymb, Offset.Y + number);
+            Console.Write(line.Substring(numOfSymb));
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
         public void ClearLineAndWrite(string line, int number = 0)
         {
             ClearLine(number);
             WriteLine(line, number);
+        }
+
+        public void ClearLineAndWrite(string line, ConsoleColor color, int numOfSymbol, int number = 0)
+        {
+            ClearLine(number);
+            WriteLine(line, color, numOfSymbol, number);
         }
     }
 }

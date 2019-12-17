@@ -14,9 +14,9 @@ namespace Roguelike
             if (!tiles.ContainsKey(TileFlyweight.Type.Wall))
                 tiles.Add(TileFlyweight.Type.Wall, new TileFlyweight("Wall", "Common wall", '▒', -1, TileFlyweight.Type.Wall));
             if (!tiles.ContainsKey(TileFlyweight.Type.Water))
-                tiles.Add(TileFlyweight.Type.Water, new TileFlyweight("Treasure", "Unusual treasure", 'T', 20, TileFlyweight.Type.Water));
+                tiles.Add(TileFlyweight.Type.Water, new TileFlyweight("Water", "Water", '~', 20, TileFlyweight.Type.Water, ConsoleColor.Blue));
             if (!tiles.ContainsKey(TileFlyweight.Type.Lava))
-                tiles.Add(TileFlyweight.Type.Lava, new TileFlyweight("Treasure", "Unusual treasure", 'T', 30, TileFlyweight.Type.Lava));
+                tiles.Add(TileFlyweight.Type.Lava, new TileFlyweight("Lava", "Lava", '~', 30, TileFlyweight.Type.Lava, ConsoleColor.DarkRed));
         }
 
         public TileFlyweight GetTile(Tile tile)
