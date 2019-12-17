@@ -28,7 +28,7 @@ namespace Roguelike
             Map.BuildTileMap();
             Map.Offset = new Point(0, 0);
             CurrentHero = new Hero(new Point(12, 10), 15, 0, 8, 10, "Chiks-Chiriks");
-            TmpMonster = new Monster(new Point(15, 15), 10, 10, 10, "Snake", 'S');
+            TmpMonster = new Monster(new Point(15, 15), 10, 1000, 10, "Snake", 'S', new DijkstraAI());
             Inspector = new MapInspector("Inspector", new Point(CurrentHero.Coords.X, CurrentHero.Coords.Y));
             GameStarted = true;
             ConsoleHeight = Console.WindowHeight;
@@ -381,6 +381,36 @@ namespace Roguelike
         public int GetMapWidth()
         {
             return Map.MapSize.Width;
+        }
+
+        public Tile[,] GetMapRegion(Point a, Point b, int offset)
+        {
+            //в get tile передавать координаты героя, т.к там они уже меняются
+            if (a.X > b.X) Point.SwapPoints(ref a, ref b);
+            if (a.Y > b.Y)
+            {
+                int tmp;
+                tmp = a.Y;
+                a.Y = b.Y;
+                b.Y = tmp;
+            }
+
+            a.X = Math.Max(a.X - offset, 0);
+            b.X = Math.Min(b.X + offset, Map.WorldTile.GetLength(0) - 1); //map height
+            a.Y = Math.Max(a.Y - offset, 0);
+            b.Y = Math.Min(b.Y + offset, Map.WorldTile.GetLength(1) - 1); //map width
+
+            Tile[,] region = new Tile[b.X - a.X + 1, b.Y - a.Y + 1];
+
+            for (int i = a.X; i <= b.X; i++)
+            {
+                for (int j = a.Y; j <= b.Y; j++)
+                {
+                    region[i - a.X, j - a.Y] = Map.WorldTile[i, j];
+                }
+            }
+
+            return region;
         }
 
         /// <summary>
