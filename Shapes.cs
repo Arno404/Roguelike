@@ -35,6 +35,18 @@ namespace Roguelike
         {
             return Math.Sqrt(Math.Pow(x.X - this.X, 2) + Math.Pow(x.Y - this.Y, 2));
         }
+
+        public Point Invert()
+        {
+            return new Point(Y, X);
+        }
+
+        public static void SwapPoints(ref Point x, ref Point y)
+        {
+            Point tmp = x;
+            x = y;
+            y = tmp;
+        }
     }
 
     class Rectangle
