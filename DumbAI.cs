@@ -8,6 +8,9 @@ namespace Roguelike
 {
     class DumbAI : IMonsterIntelligence
     {
+        public void FindPath(Monster monster, BaseEntity target)
+        {
 
+        }
     }
 }
